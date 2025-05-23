@@ -1,0 +1,30 @@
+{
+  "name": "mmm-mta-subwayalerts",
+  "version": "1.0.1",
+  "description": "MTA realtime subway alerts module for MagicMirror².",
+  "main": "MMM-MTASubwayAlerts.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/avianto/MMM-MTA-SubwayAlerts.git"
+  },
+  "keywords": [
+    "MagicMirror²",
+    "MagicMirror",
+    "transit", 
+    "mta", 
+    "subway", 
+    "alerts",
+    "NYC",
+    "New York City"
+  ],
+  "author": "avianto",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/avianto/MMM-MTA-SubwayAlerts/issues"
+  },
+  "homepage": "https://github.com/avianto/MMM-MTA-SubwayAlerts#readme",
+  "dependencies": {
+    "node-fetch": "^3.3.2",
+    "gtfs-realtime-bindings": "^1.1.1"
+  }
+}

@@ -1,0 +1,108 @@
+/* mta-alerts.css */
+
+.mta-content-container {
+  margin-top: 10px;
+}
+
+.mta-alerts-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.mta-alert {
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mta-alert:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.mta-alert-header {
+  font-size: 1.1em;
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: #fff;
+}
+
+/* Base styling for subway line icons */
+.mta-route-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5em;
+  height: 1.5em;
+  border-radius: 50%;
+  font-size: 0.8em;
+  font-weight: bold;
+  color: #FFF;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+  line-height: 1;
+  padding: 2px;
+  box-sizing: border-box;
+  flex-shrink: 0; /* Prevent icons from shrinking */
+}
+
+.mta-route-icon--inline {
+  width: 1.3em;
+  height: 1.3em;
+  font-size: 1em;
+  vertical-align: middle;
+  margin: 0 2px;
+}
+
+.mta-special-icon {
+  vertical-align: middle;
+  font-size: 1.1em;
+  margin: 0 2px;
+   color: #fff;
+}
+
+
+/* Specific colors for each subway line */
+/* Red lines (1, 2, 3) */
+.route-1, .route-2, .route-3 { background-color: #EE352E; }
+/* Green lines (4, 5, 6) */
+.route-4, .route-5, .route-6 { background-color: #00933C; }
+/* Blue lines (A, C, E, SIR) */
+.route-A, .route-C, .route-E, .route-SIR { background-color: #0039A6; }
+/* Orange lines (B, D, F, M) */
+.route-B, .route-D, .route-F, .route-M { background-color: #FF6319; }
+/* Yellow lines (N, Q, R, W) */
+.route-N, .route-Q, .route-R, .route-W { background-color: #FCCC0A; color: #000; text-shadow: none; }
+/* Grey lines (L) */
+.route-L { background-color: #A7A9AC; }
+/* Lime Green (G) */
+.route-G { background-color: #6CBE45; }
+/* Brown lines (J, Z) */
+.route-J, .route-Z { background-color: #996633; }
+/* Purple line (7) */
+.route-7 { background-color: #B933AD; }
+/* S Shuttle (typically gray, but can vary) */
+.route-S { background-color: #808183; }
+
+
+/* Helper classes from MagicMirror core for text sizing/color */
+.dimmed {
+  color: #666;
+}
+
+.light {
+  font-weight: 300;
+}
+
+.small {
+  font-size: 0.9em;
+}
+
+.xsmall {
+  font-size: 0.7em;
+}
+
+.bright {
+  color: #fff;
+}
