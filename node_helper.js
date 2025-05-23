@@ -1,5 +1,4 @@
 const NodeHelper = require("node_helper");
-const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 const gtfsRealtimeBindings = require("gtfs-realtime-bindings");
 
 module.exports = NodeHelper.create({
