@@ -49,13 +49,13 @@ module.exports = NodeHelper.create({
           let shouldIncludeAlert = true
 
           if (normalizedFilterRoutes && normalizedFilterRoutes.length > 0) {
-            console.log(`  Processing alert: "${header}"`)
-            console.log(`    Alert affected routes: ${JSON.stringify(affectedRoutesArray)}`)
+            // Debugging purpose only:
+            // console.log(`  Processing alert: "${header}"`)
+            // console.log(`    Alert affected routes: ${JSON.stringify(affectedRoutesArray)}`)
 
             if (affectedRoutesArray.length === 0) {
               if (!normalizedFilterRoutes.includes('GENERAL')) {
                 shouldIncludeAlert = false
-                console.log(`    -> Excluded (General alert, 'GENERAL' not in filter)`)
               }
               else {
                 console.log(`    -> Included (General alert, 'GENERAL' in filter)`)
@@ -65,7 +65,6 @@ module.exports = NodeHelper.create({
               const intersection = affectedRoutesArray.filter(route => normalizedFilterRoutes.includes(route))
               if (intersection.length === 0) {
                 shouldIncludeAlert = false
-                console.log(`    -> Excluded (No matching routes in filter)`)
               }
               else {
                 console.log(`    -> Included (Matching routes: ${JSON.stringify(intersection)})`)

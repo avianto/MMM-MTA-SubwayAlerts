@@ -173,8 +173,7 @@ Module.register('MMM-MTA-SubwayAlerts', {
   getStyles: function () {
     return [
       'mta-subwayalerts.css',
-      // Font Awesome for special icons (Accessibility, Shuttle Bus)
-      'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css',
+      'font-awesome.css'
     ]
   },
 })
