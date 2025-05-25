@@ -1,25 +1,21 @@
 Module.register('MMM-MTA-SubwayAlerts', {
-  // Define all known MTA subway route IDs for comprehensive replacement
   knownMtaRouteIds: [
-    '1', '2', '3', // Red lines
-    '4', '5', '6', // Green lines
-    '7', // Purple lines
-    'A', 'C', 'E', // Blue lines
-    'B', 'D', 'F', 'M', // Orange lines
-    'N', 'Q', 'R', 'W', // Yellow lines
-    'G', // Lime Green line
-    'L', // Grey line
-    'J', 'Z', // Brown lines
-    'S', // Shuttle lines (e.g., Franklin Ave, Rockaway Park)
-    'SIR', // Staten Island Railway
+    '1', '2', '3',
+    '4', '5', '6',
+    '7',
+    'A', 'C', 'E',
+    'B', 'D', 'F', 'M',
+    'N', 'Q', 'R', 'W',
+    'G',
+    'L',
+    'J', 'Z',
+    'S',
+    'SIR',
   ],
 
-  // Define mapping for special text icons to Font Awesome classes
   specialIconMap: {
-    '[ACCESSIBILITY ICON]': 'fa-wheelchair', // Font Awesome wheelchair icon
-    '[SHUTTLE BUS ICON]': 'fa-bus', // Font Awesome bus icon
-    // Note: Add more mappings here if other special icons are identified, e.g.:
-    // "(A)": "fa-info-circle"
+    '[ACCESSIBILITY ICON]': 'fa-wheelchair',
+    '[SHUTTLE BUS ICON]': 'fa-bus',
   },
 
   defaults: {
@@ -30,11 +26,17 @@ Module.register('MMM-MTA-SubwayAlerts', {
     fade: true,
     fadePoint: 0.25,
     maxAlerts: 5,
-    showIcons: true, // Controls header/description route icon replacement
-    showSpecialIcons: true, // Controls replacement of special text icons (e.g., accessibility, shuttle bus)
+    showIcons: true,
+    showSpecialIcons: true,
     showDescription: true,
     noAlertsMessage: 'No subway alerts currently.',
     filterRoutes: [],
+    showActivePeriod: true,
+    dateFormat: {
+      dateStyle: 'short',
+      timeStyle: 'short',
+      hour12: true,
+    },
   },
 
   start: function () {
@@ -61,39 +63,99 @@ Module.register('MMM-MTA-SubwayAlerts', {
     })
   },
 
-  // Helper function to replace [ROUTE_ID] with colored subway icons
   replaceLineIconsInText: function (text) {
     if (!this.config.showIcons) {
-      return text // Return original text if line icons are not enabled
+      return text
     }
 
-    const regex = /\[([A-Z0-9]+)\]/g // Matches [A], [1], [L], etc.
+    const regex = /\[([A-Z0-9]+)\]/g
     return text.replace(regex, (match, routeId) => {
       const normalizedRouteId = routeId.toUpperCase()
       if (this.knownMtaRouteIds.includes(normalizedRouteId)) {
         return `<span class="mta-route-icon mta-route-icon--inline route-${normalizedRouteId}">${normalizedRouteId}</span>`
       }
-      else {
-        return match
-      }
+      return match
     })
   },
 
-  // Helper function to replace special text icons with Font Awesome icons
   replaceSpecialIconsInText: function (text) {
     if (!this.config.showSpecialIcons) {
-      return text // Return original text if special icons are not enabled
+      return text
     }
 
     let processedText = text
     for (const textIcon in this.specialIconMap) {
       const faClass = this.specialIconMap[textIcon]
-      // Use a global regex to replace all occurrences, case-insensitive
       const regex = new RegExp(textIcon.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&'), 'gi')
-
       processedText = processedText.replace(regex, `<i class="fa ${faClass} mta-special-icon"></i>`)
     }
     return processedText
+  },
+
+  formatTimestamp: function (timestamp) {
+    if (timestamp === null) { // Use === for null check
+      return 'N/A'
+    }
+    const date = new Date(timestamp * 1000)
+    const options = {
+      dateStyle: this.config.dateFormat.dateStyle,
+      timeStyle: this.config.dateFormat.timeStyle,
+      hour12: this.config.dateFormat.hour12,
+    }
+    try {
+      return date.toLocaleString(undefined, options)
+    }
+    catch (e) {
+      Log.error('Error formatting date:', e)
+      return date.toISOString()
+    }
+  },
+
+  getRelevantActivePeriod: function (activePeriods) {
+    if (!activePeriods || activePeriods.length === 0) {
+      return null
+    }
+
+    const now = Math.floor(Date.now() / 1000)
+
+    let currentPeriod = null
+    for (const period of activePeriods) {
+      const hasStarted = period.start === null || period.start <= now
+      const hasNotEnded = period.end === null || period.end >= now
+
+      if (hasStarted && hasNotEnded) {
+        currentPeriod = period
+        break
+      }
+    }
+
+    if (currentPeriod) {
+      return currentPeriod
+    }
+
+    let earliestFuturePeriod = null
+    for (const period of activePeriods) {
+      if (period.start !== null && period.start > now) {
+        if (!earliestFuturePeriod || period.start < earliestFuturePeriod.start) {
+          earliestFuturePeriod = period
+        }
+      }
+    }
+
+    if (earliestFuturePeriod) {
+      return earliestFuturePeriod
+    }
+
+    let latestPastPeriod = null
+    for (const period of activePeriods) {
+      if (period.end !== null && period.end < now) {
+        if (!latestPastPeriod || period.end > latestPastPeriod.end) {
+          latestPastPeriod = period
+        }
+      }
+    }
+
+    return latestPastPeriod || (activePeriods.length > 0 ? activePeriods[0] : null)
   },
 
   getDom: function () {
@@ -127,7 +189,6 @@ Module.register('MMM-MTA-SubwayAlerts', {
 
         const header = document.createElement('div')
         header.className = 'mta-alert-header bright'
-        // Apply both icon replacements
         let formattedHeader = this.replaceLineIconsInText(alert.header)
         formattedHeader = this.replaceSpecialIconsInText(formattedHeader)
         header.innerHTML = formattedHeader
@@ -136,11 +197,40 @@ Module.register('MMM-MTA-SubwayAlerts', {
         if (this.config.showDescription && alert.description) {
           const description = document.createElement('div')
           description.className = 'mta-alert-description small'
-          // Apply both icon replacements
           let formattedDescription = this.replaceLineIconsInText(alert.description)
           formattedDescription = this.replaceSpecialIconsInText(formattedDescription)
           description.innerHTML = formattedDescription
           listItem.appendChild(description)
+        }
+
+        const timestampDiv = document.createElement('div')
+        timestampDiv.className = 'mta-alert-timestamps xsmall dimmed'
+
+        if (this.config.showActivePeriod && alert.activePeriods && alert.activePeriods.length > 0) {
+          const relevantPeriod = this.getRelevantActivePeriod(alert.activePeriods)
+
+          if (relevantPeriod) {
+            let periodText = 'Active: '
+            if (relevantPeriod.start !== null) { // Use !== null for clarity
+              periodText += `From ${this.formatTimestamp(relevantPeriod.start)} `
+            }
+            if (relevantPeriod.end !== null) { // Use !== null for clarity
+              periodText += `To ${this.formatTimestamp(relevantPeriod.end)}`
+            }
+            else if (relevantPeriod.start !== null) {
+              periodText += '(Ongoing)'
+            }
+
+            if (relevantPeriod.start !== null || relevantPeriod.end !== null) {
+              const periodSpan = document.createElement('span')
+              periodSpan.innerHTML = periodText
+              timestampDiv.appendChild(periodSpan)
+            }
+          }
+        }
+
+        if (timestampDiv.childElementCount > 0) {
+          listItem.appendChild(timestampDiv)
         }
 
         if (this.config.fade && this.config.fadePoint < 1) {
@@ -173,7 +263,7 @@ Module.register('MMM-MTA-SubwayAlerts', {
   getStyles: function () {
     return [
       'mta-subwayalerts.css',
-      'font-awesome.css'
+      'font-awesome.css',
     ]
   },
 })

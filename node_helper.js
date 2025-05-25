@@ -49,10 +49,6 @@ module.exports = NodeHelper.create({
           let shouldIncludeAlert = true
 
           if (normalizedFilterRoutes && normalizedFilterRoutes.length > 0) {
-            // Debugging purpose only:
-            // console.log(`  Processing alert: "${header}"`)
-            // console.log(`    Alert affected routes: ${JSON.stringify(affectedRoutesArray)}`)
-
             if (affectedRoutesArray.length === 0) {
               if (!normalizedFilterRoutes.includes('GENERAL')) {
                 shouldIncludeAlert = false
@@ -73,15 +69,73 @@ module.exports = NodeHelper.create({
           }
 
           if (shouldIncludeAlert) {
+            const activePeriods = alert.activePeriod
+              ? alert.activePeriod.map(period => ({
+                  start: period.start ? period.start.low : null,
+                  end: period.end ? period.end.low : null,
+                }))
+              : []
+
             alerts.push({
               id: entity.id,
               header: header,
               description: description,
               routes: affectedRoutes || 'General Service Alert',
               routeIds: affectedRoutesArray,
+              activePeriods: activePeriods,
             })
           }
         }
+      })
+
+      alerts.sort((a, b) => {
+        const now = Math.floor(Date.now() / 1000)
+
+        let aEffectiveStart = Infinity
+        if (a.activePeriods && a.activePeriods.length > 0) {
+          for (const period of a.activePeriods) {
+            if (period.start !== null) {
+              if (period.start <= now && (period.end === null || period.end >= now)) {
+                aEffectiveStart = 0
+                break
+              }
+              if (period.start > now && period.start < aEffectiveStart) {
+                aEffectiveStart = period.start
+              }
+            }
+            else {
+              aEffectiveStart = 0
+              break
+            }
+          }
+        }
+        else {
+          aEffectiveStart = 0
+        }
+
+        let bEffectiveStart = Infinity
+        if (b.activePeriods && b.activePeriods.length > 0) {
+          for (const period of b.activePeriods) {
+            if (period.start !== null) {
+              if (period.start <= now && (period.end === null || period.end >= now)) {
+                bEffectiveStart = 0
+                break
+              }
+              if (period.start > now && period.start < bEffectiveStart) {
+                bEffectiveStart = period.start
+              }
+            }
+            else {
+              bEffectiveStart = 0
+              break
+            }
+          }
+        }
+        else {
+          bEffectiveStart = 0
+        }
+
+        return aEffectiveStart - bEffectiveStart
       })
 
       console.log(`MMM-MTA-SubwayAlerts: Total alerts after filtering: ${alerts.length}`)
