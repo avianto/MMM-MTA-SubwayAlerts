@@ -62,9 +62,6 @@ module.exports = NodeHelper.create({
               if (intersection.length === 0) {
                 shouldIncludeAlert = false
               }
-              else {
-                console.log(`    -> Included (Matching routes: ${JSON.stringify(intersection)})`)
-              }
             }
           }
 
